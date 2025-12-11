@@ -1,0 +1,27 @@
+
+//   eMariete Programmable Constant Current Electronic Load
+//   https://github.com/melkati/eMariete-Programmable-Constant-Current-Electronic-Load
+
+//   Copyright (c) 2025 eMariete (https://emariete.com)
+//   Licensed under the MIT License. See LICENSE file for details.
+
+
+{
+  "name": "eMariete Programmable Constant Current Electronic Load",
+  "version": "1.0.0",
+  "description": "Library for a programmable electronic load using ESP32, MCP4725, and INA3221.",
+  "keywords": "electronic load, mcp4725, ina3221, esp32, constant current",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/melkati/eMariete-Programmable-Constant-Current-Electronic-Load.git"
+  },
+  "authors": [
+    {
+      "name": "eMariete",
+      "url": "https://emariete.com"
+    }
+  ],
+  "frameworks": "arduino",
+  "platforms": "espressif32",
+  "license": "MIT"
+}
