@@ -1,11 +1,3 @@
-
-//   eMariete Programmable Constant Current Electronic Load
-//   https://github.com/melkati/eMariete-Programmable-Constant-Current-Electronic-Load
-
-//   Copyright (c) 2025 eMariete (https://emariete.com)
-//   Licensed under the MIT License. See LICENSE file for details.
-
-
 {
   "name": "eMariete Programmable Constant Current Electronic Load",
   "version": "1.0.0",
