@@ -29,7 +29,7 @@ float exampleTempReader(int sensorId) {
 
 // Example for a 0.1 Ohm shunt resistor
 static constexpr float SHUNT_OHMS = 0.1f;
-ElectronicLoad load(MCP4725_ADDR, INA_CHANNEL, SHUNT_OHMS);
+ElectronicLoad load(MCP4725_ADDR);
 
 void setup() {
   Serial.begin(115200);
@@ -41,6 +41,9 @@ void setup() {
 
   // Initialize load library (starts I2C, zeroes DAC)
   load.begin();
+  load.setShuntResistance(0, 0.1f);
+  load.setShuntResistance(1, 0.05f);
+  load.setShuntResistance(2, 0.2f);
 
   // Automatic calibration at two DAC points with 160 and 500mA targets
   load.autoCalibrate(160, 500);
@@ -73,6 +76,12 @@ void loop() {
     if (isnan(t)) Serial.print("N/A"); else Serial.print(t,1);
     Serial.print(" C, Target="); Serial.print(load.getTargetCurrent(),3);
     Serial.print(" A, On="); Serial.println(load.isOn() ? "Yes" : "No");
+  }
+
+  for (uint8_t ch = 0; ch < 3; ++ch) {
+      float v = load.getVoltage(ch);
+      float i = load.getCurrent(ch);
+      Serial.printf("Channel %d: V=%.3fV, I=%.3fA\n", ch, v, i);
   }
 }
 

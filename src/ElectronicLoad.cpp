@@ -15,110 +15,50 @@ static constexpr int DAC_MAX = 4095;
 static constexpr int DAC_MIN = 0;
 
 // Constructor: i2cAddress (MCP4725), inaChannel (INA3221 channel: 1, 2, or 3)
-ElectronicLoad::ElectronicLoad(uint8_t i2cAddress, int inaChannel, float shuntOhms)
+ElectronicLoad::ElectronicLoad(uint8_t i2cAddress)
   : _i2cAddress(i2cAddress),
-    _inaChannel(inaChannel),
-    _ina3221(),
-    _calib_m(0.0f),
-    _calib_b(0.0f),
-    _isOn(false),
-    _targetAmps(0.0f),
-    _maxCurrentLimit(10.0f),
-    _tempReader(nullptr),
-    _tempSensorId(0),
-    _tempLimitEmergency(85.0f),
-    _tempMonitoringEnabled(false),
-    _shuntOhms(shuntOhms) {}
+    _ina3221() {}
 
-bool ElectronicLoad::begin() {
-  Wire.begin();
-  _ina3221.begin();
-  // Configura el valor del shunt para el canal seleccionado
-  _ina3221.setShuntResistance(_inaChannel, _shuntOhms);
-  writeDacValue(0);
-  return true;
-}
-
-void ElectronicLoad::turnOn() {
-  _isOn = true;
-  int dacValue = currentToDacValue(_targetAmps);
-  writeDacValue(dacValue);
-}
-
-void ElectronicLoad::turnOff() {
-  _isOn = false;
-  writeDacValue(0);
-}
-
-void ElectronicLoad::update() {
-  if (!_isOn) return;
-
-  // Over Current Protection (OCP)
-  float current = getCurrent();
-  if (!isnan(current) && current >= _maxCurrentLimit) {
-    turnOff();
-    Serial.println("[CRITICAL] OCP triggered: current exceeded limit. Load turned OFF.");
-    return;
-  }
-
-  // Over Temperature Protection (OTP)
-  if (_tempMonitoringEnabled && _tempReader) {
-    float tempC = _tempReader(_tempSensorId);
-    if (!isnan(tempC) && tempC >= _tempLimitEmergency) {
-      turnOff();
-      Serial.println("[CRITICAL] OTP triggered: temperature exceeded limit. Load turned OFF.");
-      return;
+/**
+ * Initialize the INA3221 and configure shunt resistors for all channels.
+ */
+void ElectronicLoad::begin() {
+    Wire.begin();
+    _ina3221.begin();
+    // Set shunt resistor value for each channel
+    for (uint8_t ch = 0; ch < 3; ++ch) {
+        _ina3221.setShuntResistance(ch, _shuntOhms[ch]);
     }
-  }
-
-  // Apply target current to DAC
-  int dacValue = currentToDacValue(_targetAmps);
-  writeDacValue(dacValue);
 }
 
-void ElectronicLoad::calibrate(int dacMin, float currentMeasMin, int dacMax, float currentMeasMax) {
-  if (dacMax == dacMin) {
-    _calib_m = 0.0f;
-    _calib_b = 0.0f;
-    return;
-  }
-  _calib_m = (currentMeasMax - currentMeasMin) / float(dacMax - dacMin);
-  _calib_b = currentMeasMin - _calib_m * float(dacMin);
+/**
+ * Set the shunt resistor value for a specific channel.
+ */
+void ElectronicLoad::setShuntResistance(uint8_t channel, float value) {
+    if (channel < 3) {
+        _shuntOhms[channel] = value;
+        _ina3221.setShuntResistance(channel, value);
+    }
 }
 
-bool ElectronicLoad::setTargetCurrent(float targetAmps) {
-  if (targetAmps < 0.0f) return false;
-  _targetAmps = targetAmps;
-  if (_isOn) {
-    int dacValue = currentToDacValue(_targetAmps);
-    writeDacValue(dacValue);
-  }
-  return true;
+/**
+ * Get the bus voltage for a specific channel.
+ */
+float ElectronicLoad::getVoltage(uint8_t channel) {
+    if (channel < 3) {
+        return _ina3221.getBusVoltage(channel);
+    }
+    return NAN;
 }
 
-void ElectronicLoad::setMaxCurrentLimit(float limitAmps) {
-  if (limitAmps > 0.0f) {
-    _maxCurrentLimit = limitAmps;
-  }
-}
-
-void ElectronicLoad::setTemperatureReader(TemperatureReaderCallback callback, int sensorId) {
-  _tempReader = callback;
-  _tempSensorId = sensorId;
-  _tempMonitoringEnabled = (_tempReader != nullptr);
-}
-
-void ElectronicLoad::setTemperatureLimit(float degreesC) {
-  _tempLimitEmergency = degreesC;
-  _tempMonitoringEnabled = (_tempReader != nullptr);
-}
-
-float ElectronicLoad::getVoltage() {
-    return _ina3221.getBusVoltage(_inaChannel);
-}
-
-float ElectronicLoad::getCurrent() {
-    return _ina3221.getCurrentAmps(_inaChannel);
+/**
+ * Get the current (in Amps) for a specific channel.
+ */
+float ElectronicLoad::getCurrent(uint8_t channel) {
+    if (channel < 3) {
+        return _ina3221.getCurrentAmps(channel);
+    }
+    return NAN;
 }
 
 float ElectronicLoad::getPower() {

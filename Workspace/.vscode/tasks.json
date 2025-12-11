@@ -1,0 +1,19 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Build BasicUsage (PlatformIO)",
+			"type": "shell",
+			"command": "pio",
+			"args": [
+				"run",
+				"-d",
+				"examples/BasicUsage"
+			],
+			"isBackground": false,
+			"problemMatcher": [
+				"$platformio"
+			]
+		}
+	]
+}

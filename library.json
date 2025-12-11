@@ -1,6 +1,6 @@
 {
   "name": "eMariete Programmable Constant Current Electronic Load",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Library for a programmable electronic load using ESP32, MCP4725, and INA3221.",
   "keywords": "electronic load, mcp4725, ina3221, esp32, constant current",
   "repository": {
