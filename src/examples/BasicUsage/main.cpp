@@ -29,7 +29,7 @@ float exampleTempReader(int sensorId) {
 
 // Example for a 0.1 Ohm shunt resistor
 static constexpr float SHUNT_OHMS = 0.1f;
-ElectronicLoad load(MCP4725_ADDR, INA_CHANNEL, SHUNT_OHMS);
+ElectronicLoad load(MCP4725_ADDR);
 
 void setup() {
   Serial.begin(115200);
@@ -41,18 +41,22 @@ void setup() {
 
   // Initialize load library (starts I2C, zeroes DAC)
   load.begin();
+  load.setShuntResistance(0, 0.1f);
+  load.setShuntResistance(1, 0.05f);
+  load.setShuntResistance(2, 0.2f);
 
-  // Automatic calibration at two DAC points with 160 and 500mA targets
-  load.autoCalibrate(160, 500);
+  // Automatic calibration at two DAC points (per-channel API)
+  bool ok = load.autoCalibrate(INA_CHANNEL, 160, 500);
+  Serial.print("autoCalibrate OK: "); Serial.println(ok ? "true" : "false");
 
   // Safety limits
   load.setMaxCurrentLimit(1.5f);     // 1.5 A OCP
   load.setTemperatureReader(exampleTempReader, 0);
   load.setTemperatureLimit(70.0f);   // 70 C OTP
 
-  // Set target and enable
-  load.setTargetCurrent(0.3f); // 0.3 A
-  load.turnOn();
+  // Set target and enable (per-channel)
+  load.setTargetCurrent(INA_CHANNEL, 0.3f); // 0.3 A
+  load.turnOn(INA_CHANNEL);
 }
 
 void loop() {
@@ -71,23 +75,16 @@ void loop() {
     Serial.print(" A, P="); Serial.print(p,3);
     Serial.print(" W, T=");
     if (isnan(t)) Serial.print("N/A"); else Serial.print(t,1);
-    Serial.print(" C, Target="); Serial.print(load.getTargetCurrent(),3);
+    Serial.print(" C, Target="); Serial.print(load.getTargetCurrent(INA_CHANNEL),3);
     Serial.print(" A, On="); Serial.println(load.isOn() ? "Yes" : "No");
   }
-}
 
-// Example: apply a target and print averaged ADC-based current reading
-void calibrateStep(ElectronicLoad &load, int dacValue, int samples = 10, unsigned long delayMs = 200) {
-  delay(500); // Wait for system to settle
-  float sumI = 0.0f;
-  for (int i = 0; i < samples; ++i) {
-    delay(delayMs);
-    sumI += load.getCurrent();
+  // Per-channel verbose output disabled to reduce serial spam
+  /*
+  for (uint8_t ch = 0; ch < 3; ++ch) {
+      float v = load.getVoltage(ch);
+      float i = load.getCurrent(ch);
+      Serial.printf("Channel %d: V=%.3fV, I=%.3fA\n", ch, v, i);
   }
-  float avgI = sumI / float(samples);
-  Serial.print("DAC=");
-  Serial.print(dacValue);
-  Serial.print(" AvgCurrent=");
-  Serial.print(avgI, 6);
-  Serial.println(" A");
+  */
 }
