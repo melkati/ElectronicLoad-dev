@@ -346,4 +346,10 @@ void ElectronicLoad::writeRawDac(uint16_t raw) {
   _rawDac = raw;
 }
 
-uint16_t ElectronicLoad::getRawDac() const { return _rawDac; }
+uint16_t ElectronicLoad::getRawDac() const { return _rawDac; }// --- Shunt ---
+void ElectronicLoad::setShuntResistance(uint8_t channel, float value) {
+  if (isValidChannel(channel)) {
+    _shuntOhms[channel] = value;
+    _ina3221.setShuntResistance(channel, value);
+  }
+}

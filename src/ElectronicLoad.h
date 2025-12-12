@@ -43,7 +43,7 @@ public:
   bool setTargetCurrent(uint8_t channel, float targetAmps);
   // legacy convenience: uses default INA channel
   bool setTargetCurrent(float targetAmps) { return setTargetCurrent((uint8_t)_inaChannel, targetAmps); }
-  float getTargetCurrent() const { return getTargetCurrent((uint8_t)_inaChannel); }
+  float getTargetCurrent() const;
   float getTargetCurrent(uint8_t channel) const;
 
   // Overcurrent protection
