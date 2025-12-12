@@ -1,0 +1,36 @@
+{
+  "name": "eMariete Programmable Constant Current Electronic Load",
+  "version": "0.1.0",
+  "description": "Triple-channel programmable electronic load helper for ESP32 + INA3221 + MCP4725",
+  "keywords": ["electronic-load", "ina3221", "mcp4725", "esp32", "constant-current"],
+  "homepage": "https://github.com/melkati/eMariete-Programmable-Constant-Current-Electronic-Load",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/melkati/eMariete-Programmable-Constant-Current-Electronic-Load.git"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "eMariete",
+      "url": "https://emariete.com"
+    }
+  ],
+  "frameworks": ["arduino"],
+  "platforms": ["espressif32", "espressif8266", "atmelavr"],
+  "dependencies": [
+    {
+      "owner": "adafruit",
+      "name": "Adafruit INA3221 Library",
+      "version": "^1.0.1"
+    },
+    {
+      "owner": "adafruit",
+      "name": "Adafruit BusIO",
+      "version": "^1.14.5"
+    }
+  ],
+  "examples": [
+    "examples/BasicUsage/*"
+  ]
+}
+
